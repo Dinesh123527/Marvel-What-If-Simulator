@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌌 MCU What If Simulator
 
-## Getting Started
+> "Time. Space. Reality. It's more than a linear path. It's a prism of endless possibility."
 
-First, run the development server:
+The **MCU What If Simulator** is an interactive web application that allows users to explore alternate timelines of the Marvel Cinematic Universe. By identifying "Nexus Events" and choosing different outcomes, users can generate unique divergent realities, visualized with T.V.A. style aesthetics.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+![TVA Interface](public/icon.svg)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 🔮 Rule-Based Simulation Engine
+- **Deterministic Logic**: A robust Phase 3 engine that calculates timeline outcomes based on specific canon divergence rules.
+- **Multiverse Scenarios**: Explore key moments like *The Snap*, *Battle of NY*, and *Civil War*.
+- **Legacy Compatibility**: Automatically maps legacy divergence IDs to the new engine logic.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 📈 Interactive Timeline Visualization
+- **Bezier Curve Graphs**: Realistic, flowing timeline branches that mimic the "Sacred Timeline" aesthetic.
+- **Dynamic Branch Points**: Graph nodes are generated in real-time based on simulation events.
+- **Character Injection**: Automatically detects and tags key characters (Iron Man, Thanos, etc.) on the timeline nodes.
 
-## Learn More
+### 📺 TVA Datapad Interface
+- **Immersive UI**: Glassmorphism alerts and panels styled after Time Variance Authority (T.V.A.) technology.
+- **Animated Alerts**: Holographic "Datapad" notifications with CRT scanline effects.
+- **Phase Filtering**: Filter scenarios by MCU Phase (1-4) with instant client-side updates.
 
-To learn more about Next.js, take a look at the following resources:
+### 🦸 Character Database
+- **SuperHero API Integration**: Fetches and caches character stats (Power, Speed, Intelligence) to influence simulation stability (Coming Soon).
+- **A-Z Filtering**: Browse the Marvel roster efficiently.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛠️ Tech Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS + Custom CSS Variables
+- **Animations**: Framer Motion
+- **Database**: MySQL (via `mysql2`)
+- **Icons**: Heroicons & Custom SVG
 
-## Deploy on Vercel
+## 🚀 Getting Started
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/Dinesh123527/Marvel-What-If-Simulator.git
+    cd Marvel-What-If-Simulator
+    ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+
+3.  **Setup Database:**
+    - Ensure you have a MySQL instance running.
+    - Create a `.env.local` file with your credentials:
+      ```env
+      DB_HOST=localhost
+      DB_USER=root
+      DB_PASSWORD=yourpassword
+      DB_NAME=mcu_what_if
+      ```
+    - Run the seed script to populate data:
+      ```bash
+      npx ts-node app/lib/seed.ts
+      ```
+
+4.  **Run the development server:**
+    ```bash
+    npm run dev
+    ```
+
+5.  **Open the app:**
+    Visit [http://localhost:3000](http://localhost:3000) to start your watch.
+
+## 🤝 Contributing
+
+The Multiverse is vast. If you have ideas for new specialized simulation rules or UI upgrades, feel free to open a Pull Request!
+
+---
+
+*Verified by the Time Variance Authority.*
