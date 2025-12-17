@@ -1,0 +1,46 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="cosmic-gradient" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2E0249" />
+      <stop offset="50%" stop-color="#5B1da3" />
+      <stop offset="100%" stop-color="#0F0C29" />
+    </linearGradient>
+    <linearGradient id="gold-gradient" x1="100" y1="100" x2="400" y2="400" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFD700" />
+      <stop offset="100%" stop-color="#FFA500" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="15" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  
+  <!-- Background Container -->
+  <rect x="0" y="0" width="512" height="512" rx="128" fill="url(#cosmic-gradient)" />
+  
+  <!-- Border -->
+  <rect x="20" y="20" width="472" height="472" rx="108" stroke="url(#gold-gradient)" stroke-width="20" stroke-opacity="0.5" />
+
+  <!-- The "W?" Symbol -->
+  <g transform="translate(256 256) scale(0.85)">
+    <!-- Shield/Portal Base Shape (Optional, kept simple for clarity) -->
+    
+    <!-- "W" Text -->
+    <path d="M-160 -120 L-110 120 L-40 -80 L0 80 L40 -80 L110 120 L160 -120" 
+          stroke="url(#gold-gradient)" 
+          stroke-width="45" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"
+          fill="none"
+          filter="url(#glow)"
+    />
+    
+    <!-- Question Mark Overlay (Stylized) -->
+    <path d="M0 -180 C80 -180 140 -120 140 -40 C140 40 80 80 80 120" 
+          stroke="#F2F2F2" 
+          stroke-width="0" 
+          opacity="0.1"
+          fill="none"
+    />
+  </g>
+</svg>
