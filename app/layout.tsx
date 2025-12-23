@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import AudioControlPanel from "./components/AudioControlPanel";
+import JarvisAssistant from "./components/JarvisAssistant";
 import Navbar from "./components/Navbar";
 import { AudioProvider } from "./contexts/AudioProvider";
+import { JarvisProvider } from "./contexts/JarvisProvider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -39,9 +40,11 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <AudioProvider>
-          <Navbar />
-          {children}
-          <AudioControlPanel />
+          <JarvisProvider>
+            <Navbar />
+            {children}
+            <JarvisAssistant />
+          </JarvisProvider>
         </AudioProvider>
       </body>
     </html>

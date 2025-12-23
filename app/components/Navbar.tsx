@@ -10,6 +10,7 @@ const navLinks = [
     { href: '/scenarios', label: 'Scenarios' },
     { href: '/characters', label: 'Characters' },
     { href: '/quiz', label: 'Quiz' },
+    { href: '/personality', label: 'Personality' },
     { href: '/multiverse', label: 'Multiverse' },
 ];
 

@@ -2,13 +2,16 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+import LeaveConfirmModal from '../components/LeaveConfirmModal';
 import QuizModeSelector from '../components/quiz/QuizModeSelector';
 import QuizOptions from '../components/quiz/QuizOptions';
 import QuizQuestion from '../components/quiz/QuizQuestion';
 import QuizResults from '../components/quiz/QuizResults';
 import QuizScoreboard from '../components/quiz/QuizScoreboard';
-import { useAudio, useSoundEffect } from '../contexts/AudioProvider';
+import { useSoundEffect } from '../contexts/AudioProvider';
+import { useJarvis } from '../contexts/JarvisProvider';
 
 interface QuizQuestionData {
     id: number;
@@ -45,13 +48,18 @@ const HINT_PENALTY = 30;
 const STREAK_BONUS = 25;
 
 export default function QuizPage() {
+    const router = useRouter();
     const { playClick, initializeAudio } = useSoundEffect();
-    const { isScreenReaderEnabled, speakText } = useAudio();
+    const { isJarvisEnabled, jarvisRespond } = useJarvis();
 
     // Game state
     const [gamePhase, setGamePhase] = useState<GamePhase>('menu');
     const [mode, setMode] = useState<QuizMode | null>(null);
     const [questions, setQuestions] = useState<QuizQuestionData[]>([]);
+
+    // Leave confirmation modal
+    const [showLeaveModal, setShowLeaveModal] = useState(false);
+    const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
     // Score tracking
@@ -87,6 +95,52 @@ export default function QuizPage() {
         }
     }, []);
 
+    // Warn user before leaving during active quiz
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (gamePhase === 'playing' || gamePhase === 'loading') {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [gamePhase]);
+
+    // Intercept nav link clicks during quiz
+    useEffect(() => {
+        const handleLinkClick = (e: MouseEvent) => {
+            if (gamePhase !== 'playing' && gamePhase !== 'loading') return;
+
+            const target = e.target as HTMLElement;
+            const anchor = target.closest('a');
+
+            if (anchor && anchor.href && !anchor.href.includes('/quiz')) {
+                e.preventDefault();
+                e.stopPropagation();
+                setPendingNavigation(anchor.href);
+                setShowLeaveModal(true);
+            }
+        };
+
+        document.addEventListener('click', handleLinkClick, true);
+        return () => document.removeEventListener('click', handleLinkClick, true);
+    }, [gamePhase]);
+
+    // Handle leave confirmation
+    const handleConfirmLeave = () => {
+        setShowLeaveModal(false);
+        if (pendingNavigation) {
+            router.push(pendingNavigation);
+        }
+    };
+
+    const handleCancelLeave = () => {
+        setShowLeaveModal(false);
+        setPendingNavigation(null);
+    };
+
     // Save high scores to localStorage
     const saveHighScore = useCallback((newScore: number, quizMode: QuizMode) => {
         const current = highScores[quizMode] || 0;
@@ -99,31 +153,6 @@ export default function QuizPage() {
         }
         return false;
     }, [highScores]);
-
-    // Announce question via screen reader when question changes
-    useEffect(() => {
-        if (!isScreenReaderEnabled || gamePhase !== 'playing' || questions.length === 0) return;
-
-        const question = questions[currentQuestionIndex];
-        if (!question) return;
-
-        let text = `Question ${currentQuestionIndex + 1} of ${questions.length}. `;
-
-        if (question.mode === 'stats' && question.data.stats) {
-            const s = question.data.stats;
-            text += `Guess the character by stats. Intelligence: ${s.intelligence}. Strength: ${s.strength}. Speed: ${s.speed}. Durability: ${s.durability}. Power: ${s.power}. Combat: ${s.combat}. `;
-        } else if (question.mode === 'hints' && question.data.hints) {
-            text += `Guess by hints. First hint: ${question.data.hints[0]}. `;
-        } else if (question.mode === 'silhouette') {
-            text += `Guess the silhouette. A mystery character is hidden in the shadows. `;
-            if (question.data.alignment) {
-                text += `This character is a ${question.data.alignment}. `;
-            }
-        }
-
-        text += `Options: ${question.options.join(', ')}.`;
-        speakText(text);
-    }, [currentQuestionIndex, gamePhase, questions, isScreenReaderEnabled, speakText]);
 
     // Fetch questions from API
     const fetchQuestions = async (selectedMode: QuizMode) => {
@@ -161,6 +190,11 @@ export default function QuizPage() {
         setHintPenalty(0);
         setIsNewHighScore(false);
         fetchQuestions(selectedMode);
+
+        // J.A.R.V.I.S. commentary
+        if (isJarvisEnabled) {
+            jarvisRespond('quiz-start');
+        }
     };
 
     // Handle answer selection
@@ -196,15 +230,6 @@ export default function QuizPage() {
             character: currentQuestion.correctAnswer,
             userAnswer: answer,
         }]);
-
-        // Screen reader feedback
-        if (isScreenReaderEnabled) {
-            if (isCorrect) {
-                speakText(`Correct! The answer is ${currentQuestion.correctAnswer}.`);
-            } else {
-                speakText(`Wrong! You selected ${answer}. The correct answer is ${currentQuestion.correctAnswer}.`);
-            }
-        }
     };
 
     // Move to next question or end game
@@ -412,6 +437,15 @@ export default function QuizPage() {
                     </AnimatePresence>
                 </div>
             </section>
+
+            {/* Leave Confirmation Modal */}
+            <LeaveConfirmModal
+                isOpen={showLeaveModal}
+                onConfirm={handleConfirmLeave}
+                onCancel={handleCancelLeave}
+                title="Leaving So Soon?"
+                message="Your quiz progress will be lost! Are you sure you want to abandon your mission?"
+            />
         </main>
     );
 }

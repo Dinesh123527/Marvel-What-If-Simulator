@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import { useAudio, useSoundEffect } from '../../contexts/AudioProvider';
+import { useSoundEffect } from '../../contexts/AudioProvider';
 
 interface QuizAnswer {
     correct: boolean;
@@ -84,7 +84,6 @@ export default function QuizResults({
     isNewHighScore,
 }: QuizResultsProps) {
     const { playClick, playHover } = useSoundEffect();
-    const { isScreenReaderEnabled, speakText } = useAudio();
     const maxScore = totalQuestions * 100;
     const { grade, color, message } = getGrade(score, maxScore);
     const correctCount = answers.filter(a => a.correct).length;
@@ -96,14 +95,6 @@ export default function QuizResults({
     };
 
     const showConfetti = score >= maxScore * 0.75;
-
-    // Speak results when component mounts
-    useEffect(() => {
-        if (isScreenReaderEnabled) {
-            const text = `Quiz Complete! Grade: ${grade}. ${message} You scored ${score} points with ${correctCount} out of ${totalQuestions} correct answers. Best streak: ${bestStreak}. ${isNewHighScore ? 'Congratulations, new high score!' : `High score: ${highScore}.`}`;
-            speakText(text);
-        }
-    }, [isScreenReaderEnabled, grade, message, score, correctCount, totalQuestions, bestStreak, isNewHighScore, highScore, speakText]);
 
     return (
         <>

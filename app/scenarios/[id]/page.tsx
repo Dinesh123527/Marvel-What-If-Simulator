@@ -11,12 +11,14 @@ import TimelineGraph from '../../components/TimelineGraph';
 import TVAAlert from '../../components/TVAAlert';
 import WatcherNarration from '../../components/WatcherNarration';
 import { useSoundEffect } from '../../contexts/AudioProvider';
+import { useJarvis } from '../../contexts/JarvisProvider';
 import { Divergence, Scenario, SimulationResult } from '../../lib/types';
 
 export default function SimulatorPage() {
     const params = useParams();
     const scenarioId = Number(params.id);
     const { playSimulationStart, playSimulationComplete, playAlert, initializeAudio } = useSoundEffect();
+    const { isJarvisEnabled, jarvisRespond } = useJarvis();
 
     const [scenario, setScenario] = useState<Scenario | null>(null);
     const [divergences, setDivergences] = useState<Divergence[]>([]);
@@ -60,6 +62,11 @@ export default function SimulatorPage() {
         // Play simulation start sound
         playSimulationStart();
 
+        // J.A.R.V.I.S. commentary
+        if (isJarvisEnabled) {
+            jarvisRespond('simulation-start');
+        }
+
         try {
             const response = await fetch('/api/simulate', {
                 method: 'POST',
@@ -81,6 +88,11 @@ export default function SimulatorPage() {
                 setTimeout(() => {
                     setShowNarration(true);
                     playSimulationComplete();
+
+                    // J.A.R.V.I.S. commentary on completion
+                    if (isJarvisEnabled) {
+                        jarvisRespond('simulation-complete');
+                    }
                 }, 500);
             }
         } catch (error) {
