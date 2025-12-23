@@ -2,6 +2,49 @@ import { NextResponse } from "next/server";
 import { getDivergenceById } from "../../lib/data";
 import { runSimulation } from "../../lib/simulation/engine";
 
+// Mapping of divergence shortLabels to simulation engine keys
+const DIVERGENCE_MAPPING: Record<string, { canonEvent: string; divergenceKey: string }> = {
+    // Scenario 1: Endgame Final Battle
+    'Tony Survives': { canonEvent: 'INFINITY_WAR', divergenceKey: 'TONY_SURVIVES' },
+    'Nebula Snaps': { canonEvent: 'INFINITY_WAR', divergenceKey: 'NEBULA_SNAPS' },
+    'Carol Snaps': { canonEvent: 'INFINITY_WAR', divergenceKey: 'CAROL_SNAPS' },
+
+    // Scenario 2: The Snap (Wakanda Battle)
+    'Thor Goes for the Head': { canonEvent: 'THE_SNAP', divergenceKey: 'THOR_HEAD' },
+    'Mind Stone Destroyed': { canonEvent: 'THE_SNAP', divergenceKey: 'MIND_STONE_DESTROYED' },
+    'Gauntlet Seized': { canonEvent: 'THE_SNAP', divergenceKey: 'GAUNTLET_SEIZED' },
+
+    // Scenario 3: Battle of New York
+    'Avengers Never Form': { canonEvent: 'BATTLE_OF_NY', divergenceKey: 'AVENGERS_NEVER_FORM' },
+    'Loki Conquers': { canonEvent: 'BATTLE_OF_NY', divergenceKey: 'LOKI_CONQUERS' },
+    'Hulk Corrupted': { canonEvent: 'BATTLE_OF_NY', divergenceKey: 'HULK_CORRUPTED' },
+
+    // Scenario 4: Civil War
+    'Avengers United': { canonEvent: 'CIVIL_WAR', divergenceKey: 'AVENGERS_UNITED' },
+    'Zemo Captured': { canonEvent: 'CIVIL_WAR', divergenceKey: 'ZEMO_CAPTURED' },
+    "T'Challa Switches": { canonEvent: 'CIVIL_WAR', divergenceKey: 'TCHALLA_SWITCHES' },
+
+    // Scenario 5: Multiverse of Madness
+    'Wanda Heals': { canonEvent: 'MULTIVERSE_OF_MADNESS', divergenceKey: 'WANDA_HEALS' },
+    'Multiverse Breaks': { canonEvent: 'MULTIVERSE_OF_MADNESS', divergenceKey: 'MULTIVERSE_BREAKS' },
+    'Illuminati Wins': { canonEvent: 'MULTIVERSE_OF_MADNESS', divergenceKey: 'ILLUMINATI_WINS' },
+
+    // Scenario 8: Winter Soldier
+    'Project Insight Succeeds': { canonEvent: 'WINTER_SOLDIER', divergenceKey: 'PROJECT_INSIGHT_SUCCEEDS' },
+    'Bucky Remembers': { canonEvent: 'WINTER_SOLDIER', divergenceKey: 'BUCKY_REMEMBERS' },
+    'Nick Fury Dies': { canonEvent: 'WINTER_SOLDIER', divergenceKey: 'NICK_FURY_DIES' },
+
+    // Scenario 9: Guardians of the Galaxy
+    'Ronan Wins': { canonEvent: 'GUARDIANS', divergenceKey: 'RONAN_WINS' },
+    'Guardians Never Form': { canonEvent: 'GUARDIANS', divergenceKey: 'GUARDIANS_NEVER_FORM' },
+    'Thanos Gets the Stone': { canonEvent: 'GUARDIANS', divergenceKey: 'THANOS_GETS_STONE' },
+
+    // Scenario 10: Age of Ultron
+    'Ultron Wins': { canonEvent: 'AGE_OF_ULTRON', divergenceKey: 'ULTRON_WINS' },
+    'Vision Corrupted': { canonEvent: 'AGE_OF_ULTRON', divergenceKey: 'VISION_CORRUPTED' },
+    'No Ultron Created': { canonEvent: 'AGE_OF_ULTRON', divergenceKey: 'NO_ULTRON_CREATED' },
+};
+
 export async function POST(req: Request) {
     try {
         const body = await req.json();
@@ -17,13 +60,14 @@ export async function POST(req: Request) {
             if (divergence) {
                 divergenceLabel = divergence.shortLabel;
 
-                // Map known seeds to rules
-                if (divergence.shortLabel === 'Tony Survives') {
-                    canonEvent = 'INFINITY_WAR';
-                    divergenceKey = 'TONY_SURVIVES';
+                // Look up in our mapping table
+                const mapping = DIVERGENCE_MAPPING[divergence.shortLabel];
+                if (mapping) {
+                    canonEvent = mapping.canonEvent;
+                    divergenceKey = mapping.divergenceKey;
+                    console.log(`[API/Simulate] Mapped "${divergence.shortLabel}" to ${canonEvent}/${divergenceKey}`);
                 }
-                // Fallback: If we found the divergence in DB but have no specific rule yet,
-                // we will construct a temporary "Generic" rule to prevent 400 errors.
+                // Fallback: If we found the divergence in DB but have no specific rule yet
                 else {
                     console.log(`[API/Simulate] No specific rule for "${divergence.shortLabel}". Using generic fallback.`);
                     canonEvent = 'GENERIC_FALLBACK';
@@ -132,8 +176,9 @@ export async function POST(req: Request) {
                 description: e.description,
                 type: e.impact === 'high' ? 'immediate' : 'ripple'
             })),
-            branchPoints: visualizationPoints, // Add this!
-            characters: {}
+            branchPoints: visualizationPoints,
+            characters: {},
+            characterFates: result.characterFates || [],
         };
 
         return NextResponse.json({ success: true, data: adaptedResult });

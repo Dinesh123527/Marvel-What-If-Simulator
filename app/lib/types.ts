@@ -1,3 +1,5 @@
+import { CharacterFate } from './character-fates';
+
 export interface Scenario {
     id: number;
     title: string;
@@ -52,6 +54,7 @@ export interface SimulationResult {
     events: TimelineEvent[];
     branchPoints: BranchPoint[];
     characters?: Record<string, CharacterData>;
+    characterFates?: CharacterFate[];
 }
 
 export interface BranchPoint {

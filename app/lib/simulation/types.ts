@@ -1,3 +1,5 @@
+import { CharacterFate } from "../character-fates";
+
 export type DivergenceInput = {
     canonEvent: string;
     divergenceKey: string;
@@ -12,7 +14,9 @@ export type TimelineEvent = {
 export type SimulationResult = {
     universeCode: string;
     stabilityScore: number;
-    tone: "hopeful" | "dark" | "chaotic";
+    tone: "hopeful" | "dark" | "chaotic" | "stable";
     summary: string;
     events: TimelineEvent[];
+    characterFates?: CharacterFate[];
 };
+

@@ -3,16 +3,24 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useSoundEffect } from '../contexts/AudioProvider';
 
 const navLinks = [
     { href: '/', label: 'Home' },
     { href: '/scenarios', label: 'Scenarios' },
     { href: '/characters', label: 'Characters' },
+    { href: '/quiz', label: 'Quiz' },
     { href: '/multiverse', label: 'Multiverse' },
 ];
 
 export default function Navbar() {
     const pathname = usePathname();
+    const { playClick, playHover, initializeAudio } = useSoundEffect();
+
+    const handleClick = () => {
+        initializeAudio();
+        playClick();
+    };
 
     return (
         <motion.nav
@@ -25,7 +33,7 @@ export default function Navbar() {
                 <div className="container-cosmic">
                     <div className="flex items-center justify-between h-[var(--nav-height)]">
                         {/* Logo */}
-                        <Link href="/" className="group flex items-center gap-3">
+                        <Link href="/" className="group flex items-center gap-3" onClick={handleClick}>
                             <motion.div
                                 className="relative w-10 h-10 flex items-center justify-center"
                                 whileHover={{ scale: 1.1, rotate: 180 }}
@@ -54,6 +62,8 @@ export default function Navbar() {
                                         key={link.href}
                                         href={link.href}
                                         className="relative px-4 py-2 group"
+                                        onClick={handleClick}
+                                        onMouseEnter={playHover}
                                     >
                                         <span
                                             className={`relative z-10 text-sm font-medium transition-colors duration-300 ${isActive ? 'text-white' : 'text-text-secondary group-hover:text-white'
@@ -81,6 +91,8 @@ export default function Navbar() {
                             <Link
                                 href="/scenarios"
                                 className="btn-primary text-sm px-5 py-2.5"
+                                onClick={handleClick}
+                                onMouseEnter={playHover}
                             >
                                 <span className="relative z-10">Start Simulation</span>
                                 <svg

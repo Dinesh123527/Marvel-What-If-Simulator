@@ -2,8 +2,16 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useSoundEffect } from '../contexts/AudioProvider';
 
 export default function HeroSection() {
+    const { playClick, playHover, initializeAudio } = useSoundEffect();
+
+    const handleClick = () => {
+        initializeAudio();
+        playClick();
+    };
+
     return (
         <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-[var(--nav-height)]">
             {/* Animated Background Elements */}
@@ -87,14 +95,19 @@ export default function HeroSection() {
                         and watch as the multiverse unfolds with entirely new possibilities.
                     </motion.p>
 
-                    {/* CTA Buttons */}
+                    {/* CTA Buttons with Sound */}
                     <motion.div
                         className="flex flex-col sm:flex-row items-center justify-center gap-4"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.3 }}
                     >
-                        <Link href="/scenarios" className="btn-gold text-lg px-8 py-4 group">
+                        <Link
+                            href="/scenarios"
+                            className="btn-gold text-lg px-8 py-4 group"
+                            onClick={handleClick}
+                            onMouseEnter={playHover}
+                        >
                             <span>Begin Simulation</span>
                             <motion.svg
                                 className="w-5 h-5 ml-2 inline-block"
@@ -107,7 +120,12 @@ export default function HeroSection() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                             </motion.svg>
                         </Link>
-                        <Link href="/multiverse" className="btn-secondary text-lg px-8 py-4">
+                        <Link
+                            href="/multiverse"
+                            className="btn-secondary text-lg px-8 py-4"
+                            onClick={handleClick}
+                            onMouseEnter={playHover}
+                        >
                             <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                             </svg>

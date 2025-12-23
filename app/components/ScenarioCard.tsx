@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useAudio, useSoundEffect } from '../contexts/AudioProvider';
 import { Scenario } from '../lib/types';
 
 interface ScenarioCardProps {
@@ -24,6 +25,20 @@ const phaseIcons: Record<string, string> = {
 };
 
 export default function ScenarioCard({ scenario, index }: ScenarioCardProps) {
+    const { playClick, playHover, initializeAudio } = useSoundEffect();
+    const { isScreenReaderEnabled, speakText } = useAudio();
+
+    const handleClick = () => {
+        initializeAudio();
+        playClick();
+
+        // Screen reader narration
+        if (isScreenReaderEnabled) {
+            const text = `${scenario.title}. ${scenario.phase}, ${scenario.year}. Canon Event: ${scenario.canonEvent}. ${scenario.description}`;
+            speakText(text);
+        }
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -34,9 +49,10 @@ export default function ScenarioCard({ scenario, index }: ScenarioCardProps) {
                 ease: [0.22, 1, 0.36, 1]
             }}
             whileHover={{ y: -8 }}
+            onHoverStart={playHover}
             className="group"
         >
-            <Link href={`/scenarios/${scenario.id}`}>
+            <Link href={`/scenarios/${scenario.id}`} onClick={handleClick}>
                 <div className="card card-highlight h-full flex flex-col relative overflow-hidden">
                     {/* Gradient Background on Hover */}
                     <div className={`absolute inset-0 bg-gradient-to-br ${phaseColors[scenario.phase]} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
@@ -90,7 +106,6 @@ export default function ScenarioCard({ scenario, index }: ScenarioCardProps) {
                         </motion.div>
                     </div>
 
-                    {/* Corner Decoration */}
                     <div className="absolute top-0 right-0 w-20 h-20 overflow-hidden">
                         <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${phaseColors[scenario.phase]} opacity-20 transform rotate-45 translate-x-10 -translate-y-10`} />
                     </div>

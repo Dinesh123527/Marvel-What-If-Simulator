@@ -5,14 +5,18 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import BranchCard from '../../components/BranchCard';
+import { CharacterFateGrid } from '../../components/CharacterFateCard';
 import DivergenceSelector from '../../components/DivergenceSelector';
 import TimelineGraph from '../../components/TimelineGraph';
 import TVAAlert from '../../components/TVAAlert';
+import WatcherNarration from '../../components/WatcherNarration';
+import { useSoundEffect } from '../../contexts/AudioProvider';
 import { Divergence, Scenario, SimulationResult } from '../../lib/types';
 
 export default function SimulatorPage() {
     const params = useParams();
     const scenarioId = Number(params.id);
+    const { playSimulationStart, playSimulationComplete, playAlert, initializeAudio } = useSoundEffect();
 
     const [scenario, setScenario] = useState<Scenario | null>(null);
     const [divergences, setDivergences] = useState<Divergence[]>([]);
@@ -21,6 +25,7 @@ export default function SimulatorPage() {
     const [simulationResult, setSimulationResult] = useState<SimulationResult | null>(null);
     const [showTVAAlert, setShowTVAAlert] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [showNarration, setShowNarration] = useState(false);
 
     useEffect(() => {
         if (scenarioId) {
@@ -44,9 +49,16 @@ export default function SimulatorPage() {
     const handleSimulate = async () => {
         if (!selectedDivergenceId) return;
 
+        // Initialize audio on first interaction
+        initializeAudio();
+
         setIsSimulating(true);
         setSimulationResult(null);
         setShowTVAAlert(true);
+        setShowNarration(false);
+
+        // Play simulation start sound
+        playSimulationStart();
 
         try {
             const response = await fetch('/api/simulate', {
@@ -58,9 +70,18 @@ export default function SimulatorPage() {
             const data = await response.json();
 
             if (data.success) {
+                // Play alert sound
+                playAlert();
+
                 // Simulate loading time for dramatic effect
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 setSimulationResult(data.data);
+
+                // Show narration after a delay
+                setTimeout(() => {
+                    setShowNarration(true);
+                    playSimulationComplete();
+                }, 500);
             }
         } catch (error) {
             console.error('Simulation error:', error);
@@ -73,6 +94,7 @@ export default function SimulatorPage() {
         setSelectedDivergenceId(null);
         setSimulationResult(null);
         setShowTVAAlert(false);
+        setShowNarration(false);
     };
 
     if (isLoading) {
@@ -263,12 +285,37 @@ export default function SimulatorPage() {
                                             />
                                         </div>
 
+                                        {/* Watcher Narration */}
+                                        {showNarration && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                className="mb-6"
+                                            >
+                                                <WatcherNarration
+                                                    category={simulationResult.timeline.outcomeStatus as any}
+                                                />
+                                            </motion.div>
+                                        )}
+
                                         <BranchCard
                                             timeline={simulationResult.timeline}
                                             events={simulationResult.events}
                                             characters={simulationResult.characters}
                                             showEvents={true}
                                         />
+
+                                        {/* Character Fate Tracker */}
+                                        {simulationResult.characterFates && simulationResult.characterFates.length > 0 && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ delay: 0.3 }}
+                                                className="mt-8"
+                                            >
+                                                <CharacterFateGrid fates={simulationResult.characterFates} />
+                                            </motion.div>
+                                        )}
 
                                         {/* Action Buttons */}
                                         <div className="flex items-center justify-center gap-4 mt-8">

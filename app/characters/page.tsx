@@ -1,9 +1,10 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import CharacterCard from '../components/CharacterCard';
 import CharacterModal from '../components/CharacterModal';
+import { useAudio, useSoundEffect } from '../contexts/AudioProvider';
 
 interface Character {
     superheroApiId: number;
@@ -44,8 +45,34 @@ export default function CharactersPage() {
     const [page, setPage] = useState(1);
     const [totalCharacters, setTotalCharacters] = useState(0);
 
+    const { playClick, playHover, initializeAudio } = useSoundEffect();
+    const { isScreenReaderEnabled, speakText, stopSpeaking } = useAudio();
+
     const [selectedLetter, setSelectedLetter] = useState<string>('');
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+    // Text-to-speech function for character info
+    const speakCharacterInfo = useCallback((character: Character) => {
+        if (!isScreenReaderEnabled) return;
+
+        const avgPower = Math.round((character.intelligence + character.strength + character.speed + character.durability + character.power + character.combat) / 6);
+
+        const text = `
+            ${character.name}. 
+            ${character.alignment === 'hero' ? 'A hero' : character.alignment === 'villain' ? 'A villain' : 'An anti-hero'}.
+            Intelligence: ${character.intelligence}. 
+            Strength: ${character.strength}. 
+            Speed: ${character.speed}. 
+            Durability: ${character.durability}. 
+            Power: ${character.power}. 
+            Combat: ${character.combat}. 
+            Overall power rating: ${avgPower} out of 100.
+            ${character.fullName ? `Real name: ${character.fullName}.` : ''}
+            ${character.occupation ? `Occupation: ${character.occupation}.` : ''}
+        `;
+
+        speakText(text);
+    }, [isScreenReaderEnabled, speakText]);
 
     // Debounce search
     useEffect(() => {
@@ -112,11 +139,21 @@ export default function CharactersPage() {
     };
 
     const handleCharacterClick = (character: Character) => {
+        initializeAudio();
+        playClick();
+
+        // Speak character info if screen reader is enabled
+        speakCharacterInfo(character);
+
         setSelectedCharacter(character);
         setIsModalOpen(true);
     };
 
     const handleCloseModal = () => {
+        // Stop speaking when modal closes
+        if (isScreenReaderEnabled) {
+            stopSpeaking();
+        }
         setIsModalOpen(false);
         setTimeout(() => setSelectedCharacter(null), 300);
     };
@@ -174,7 +211,7 @@ export default function CharactersPage() {
                         </div>
 
                         {/* Alignment Tabs */}
-                        <div className="flex gap-2 flex-wrap justify-center">
+                        <div className="flex gap-2 flex-wrap justify-center items-center">
                             {alignmentTabs.map(tab => (
                                 <button
                                     key={tab.id}
@@ -198,8 +235,8 @@ export default function CharactersPage() {
                                 key={letter}
                                 onClick={() => handleLetterChange(letter)}
                                 className={`w-8 h-8 rounded-lg text-xs font-bold transition-all cursor-pointer ${selectedLetter === letter
-                                        ? 'bg-tva-gold text-cosmic-void shadow-lg shadow-yellow-500/20 scale-110'
-                                        : 'bg-white/5 text-text-secondary hover:bg-white/10 hover:text-white hover:scale-105'
+                                    ? 'bg-tva-gold text-cosmic-void shadow-lg shadow-yellow-500/20 scale-110'
+                                    : 'bg-white/5 text-text-secondary hover:bg-white/10 hover:text-white hover:scale-105'
                                     }`}
                             >
                                 {letter}

@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useAudio } from '../contexts/AudioProvider';
 import { Timeline, TimelineEvent } from '../lib/types';
 import CharacterCard from './CharacterCard';
 
@@ -68,6 +69,16 @@ export default function BranchCard({
 }: BranchCardProps) {
     const status = statusConfig[timeline.outcomeStatus];
     const hasCharacterData = Object.keys(characters).length > 0;
+    const { isScreenReaderEnabled, speakText } = useAudio();
+
+    const handleCardClick = () => {
+        if (isScreenReaderEnabled) {
+            const charactersText = timeline.dominantCharacters.join(', ');
+            const eventsText = events.slice(0, 3).map(e => e.description).join('. ');
+            const text = `${timeline.universeName}. Status: ${status.label}. Stability score: ${timeline.stabilityScore} percent. Dominant characters: ${charactersText}. ${eventsText ? `Events: ${eventsText}` : ''}`;
+            speakText(text);
+        }
+    };
 
     return (
         <motion.div
@@ -78,7 +89,8 @@ export default function BranchCard({
                 delay: index * 0.15,
                 ease: [0.22, 1, 0.36, 1]
             }}
-            className="card relative overflow-hidden"
+            onClick={handleCardClick}
+            className={`card relative overflow-hidden ${isScreenReaderEnabled ? 'cursor-pointer' : ''}`}
         >
             {/* Background Gradient based on status */}
             <div className={`absolute inset-0 opacity-5 bg-gradient-to-br ${timeline.outcomeStatus === 'hopeful' ? 'from-timeline-green to-transparent' :

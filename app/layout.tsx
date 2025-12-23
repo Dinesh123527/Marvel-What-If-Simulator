@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import AudioControlPanel from "./components/AudioControlPanel";
 import Navbar from "./components/Navbar";
+import { AudioProvider } from "./contexts/AudioProvider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,13 +33,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning data-scroll-behavior="smooth">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
         suppressHydrationWarning
       >
-        <Navbar />
-        {children}
+        <AudioProvider>
+          <Navbar />
+          {children}
+          <AudioControlPanel />
+        </AudioProvider>
       </body>
     </html>
   );
