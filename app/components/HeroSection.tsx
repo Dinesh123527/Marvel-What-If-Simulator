@@ -18,13 +18,13 @@ export default function HeroSection() {
             <div className="absolute inset-0 pointer-events-none">
                 {/* Cosmic Rings */}
                 <motion.div
-                    className="absolute top-1/2 left-1/2 w-[800px] h-[800px] -translate-x-1/2 -translate-y-1/2"
+                    className="absolute top-1/2 left-1/2 w-[400px] md:w-[600px] lg:w-[800px] h-[400px] md:h-[600px] lg:h-[800px] -translate-x-1/2 -translate-y-1/2"
                     animate={{ rotate: 360 }}
                     transition={{ duration: 120, repeat: Infinity, ease: 'linear' }}
                 >
                     <div className="absolute inset-0 rounded-full border border-quantum-purple/20" />
-                    <div className="absolute inset-8 rounded-full border border-nexus-blue/15" />
-                    <div className="absolute inset-16 rounded-full border border-multiverse-pink/10" />
+                    <div className="absolute inset-4 md:inset-8 rounded-full border border-nexus-blue/15" />
+                    <div className="absolute inset-8 md:inset-16 rounded-full border border-multiverse-pink/10" />
                 </motion.div>
 
                 {/* Floating Orbs */}
