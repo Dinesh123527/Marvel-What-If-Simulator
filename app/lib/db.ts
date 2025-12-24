@@ -9,6 +9,13 @@ const DB_CONFIG = {
   database: process.env.DB_NAME || 'mcu_what_if',
 };
 
+// SSL configuration for cloud databases (TiDB, PlanetScale, etc.)
+const SSL_CONFIG = process.env.DB_SSL === 'true' ? {
+  ssl: {
+    rejectUnauthorized: true,
+  }
+} : {};
+
 let pool: Pool | null = null;
 let isInitialized = false;
 
@@ -36,6 +43,7 @@ export async function initDB(): Promise<Pool> {
     user: DB_CONFIG.user,
     password: DB_CONFIG.password,
     multipleStatements: true,
+    ...SSL_CONFIG,
   });
 
   // 2️⃣ Create database if not exists
@@ -47,6 +55,7 @@ export async function initDB(): Promise<Pool> {
 
   // 3️⃣ Use database
   await connection.query(`USE \`${DB_CONFIG.database}\`;`);
+
 
   // 4️⃣ Create all tables
   await connection.query(`
@@ -138,6 +147,7 @@ export async function initDB(): Promise<Pool> {
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
+    ...SSL_CONFIG,
   });
 
   isInitialized = true;
